@@ -35,6 +35,7 @@ const logPaneRef = ref(null)
 const exThemeVars = computed(() => {
     return extraTheme(prefStore.isDark)
 })
+const macTitleInsetLeft = 88
 // const preferences = ref({})
 // provide('preferences', preferences)
 
@@ -53,7 +54,7 @@ const logoWrapperWidth = computed(() => {
     return `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`
 })
 
-const logoPaddingLeft = ref(10)
+const logoPaddingLeft = ref(isMacOS() && !isWeb() ? macTitleInsetLeft : 10)
 const maximised = ref(false)
 const hideRadius = ref(false)
 const wrapperStyle = computed(() => {
@@ -88,7 +89,7 @@ const onToggleFullscreen = (fullscreen) => {
     if (fullscreen) {
         logoPaddingLeft.value = 10
     } else {
-        logoPaddingLeft.value = isMacOS() ? 70 : 10
+        logoPaddingLeft.value = isMacOS() ? macTitleInsetLeft : 10
     }
 }
 
@@ -162,7 +163,7 @@ const onKeyShortcut = (e) => {
                     }">
                     <n-space :size="3" :wrap="false" :wrap-item="false" align="center">
                         <n-avatar :size="32" :src="iconUrl" color="#0000" style="min-width: 32px" />
-                        <div style="min-width: 68px; white-space: nowrap; font-weight: 800">Tiny RDM</div>
+                        <div style="min-width: 68px; white-space: nowrap; font-weight: 800">ZenRDM</div>
                         <transition name="fade">
                             <n-text v-if="tabStore.nav === 'browser'" class="ellipsis" strong style="font-size: 13px">
                                 - {{ tabStore.currentTabName }}
@@ -247,15 +248,17 @@ const onKeyShortcut = (e) => {
     color: v-bind('themeVars.textColorBase');
 
     #app-toolbar {
+        align-items: center;
         background-color: v-bind('exThemeVars.titleColor');
         border-bottom: 1px solid v-bind('exThemeVars.splitColor');
 
         &-title {
+            display: flex;
+            align-items: center;
+            height: 100%;
             padding-left: 10px;
             padding-right: 10px;
             box-sizing: border-box;
-            align-self: center;
-            align-items: baseline;
         }
     }
 

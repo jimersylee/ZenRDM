@@ -151,7 +151,7 @@ const handleLogin = async () => {
         <div class="login-card">
             <div class="login-header">
                 <n-avatar :size="64" :src="iconUrl" color="#0000" />
-                <div class="login-title">Tiny RDM</div>
+                <div class="login-title">ZenRDM</div>
                 <!--                <n-text depth="3" style="font-size: 13px">Redis Web Manager</n-text>-->
             </div>
 

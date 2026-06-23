@@ -2,4 +2,4 @@
 
 package consts
 
-const APP_DATA_FOLDER = "tinyrdm"
+const APP_DATA_FOLDER = "ZenRDM"

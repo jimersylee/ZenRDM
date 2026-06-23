@@ -156,6 +156,13 @@
     "empty_command_list": "暂无保存的命令",
     "execute_selected": "执行选中",
     "selected_command_count": "已选中 {count} 条命令",
+    "command_doc_acl": "ACL 分类",
+    "command_doc_complexity": "时间复杂度",
+    "command_doc_empty": "将光标移动到 Redis 命令行即可查看文档",
+    "command_doc_not_found": "未找到 {command} 的命令文档",
+    "command_doc_since": "可用版本",
+    "command_doc_source": "数据源",
+    "command_doc_syntax": "语法",
     "cli_welcome": "欢迎使用Tiny RDM的Redis命令行控制台",
     "retrieving_version": "正在检索新版本",
     "sub_tab": {

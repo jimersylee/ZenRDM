@@ -9,7 +9,9 @@ import Delete from '@/components/icons/Delete.vue'
 import Save from '@/components/icons/Save.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import { ExecCommand } from 'wailsjs/go/services/cliService.js'
+import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { REDIS_COMMAND_DOCS, REDIS_COMMAND_NAMES } from '@/consts/redis_command_docs.js'
 
 const props = defineProps({
     server: String,
@@ -26,6 +28,7 @@ const output = ref([])
 const selectedLineCount = ref(0)
 const selectedCommandCount = ref(0)
 const commandText = ref('')
+const currentCommandName = ref('')
 
 /** @type {monaco.editor.IStandaloneCodeEditor|null} */
 let editorNode = null
@@ -51,6 +54,27 @@ const isRunnableCommand = (line) => {
 }
 
 const getModel = () => editorNode?.getModel()
+
+const normalizeCommandLine = (line) => trim(line || '').replace(/\s+/g, ' ')
+
+const parseCommandName = (line) => {
+    const commandLine = normalizeCommandLine(line)
+    if (!isRunnableCommand(commandLine)) {
+        return ''
+    }
+
+    const upperLine = commandLine.toUpperCase()
+    for (const name of REDIS_COMMAND_NAMES) {
+        if (upperLine === name || upperLine.startsWith(`${name} `)) {
+            return name
+        }
+    }
+    return upperLine.split(' ')[0] || ''
+}
+
+const currentCommandDoc = computed(() => {
+    return REDIS_COMMAND_DOCS[currentCommandName.value] || null
+})
 
 const getSelectedLineRange = () => {
     const model = getModel()
@@ -97,11 +121,16 @@ const refreshSelectedCount = () => {
     if (model == null) {
         selectedLineCount.value = 0
         selectedCommandCount.value = 0
+        currentCommandName.value = ''
         return
     }
     const { start, end } = getSelectedLineRange()
     selectedLineCount.value = Math.max(0, end - start + 1)
     selectedCommandCount.value = getSelectedCommands().length
+
+    const position = editorNode?.getPosition()
+    const lineNumber = position?.lineNumber || start
+    currentCommandName.value = parseCommandName(model.getLineContent(lineNumber))
 }
 
 const saveCommands = async (showMessage = true) => {
@@ -164,6 +193,12 @@ const runSelectedCommands = async () => {
     }
 }
 
+const openCommandDoc = () => {
+    if (currentCommandDoc.value?.url) {
+        BrowserOpenURL(currentCommandDoc.value.url)
+    }
+}
+
 const destroyEditor = () => {
     if (editorNode != null) {
         const model = editorNode.getModel()
@@ -196,8 +231,11 @@ onMounted(() => {
         scrollBeyondLastLine: false,
         automaticLayout: true,
         contextmenu: false,
-        lineNumbersMinChars: 2,
-        lineDecorationsWidth: 0,
+        lineNumbersMinChars: 3,
+        lineDecorationsWidth: 8,
+        padding: {
+            top: 4,
+        },
         minimap: {
             enabled: false,
         },
@@ -258,8 +296,47 @@ onUnmounted(destroyEditor)
 
 <template>
     <div class="saved-command-pane flex-box-v">
-        <div class="saved-command-editor">
-            <div ref="editorRef" class="saved-command-editor-inst" />
+        <div class="saved-command-main">
+            <div class="saved-command-editor">
+                <div ref="editorRef" class="saved-command-editor-inst" />
+            </div>
+            <aside class="saved-command-doc">
+                <template v-if="currentCommandDoc">
+                    <div class="saved-command-doc-title">
+                        <strong>{{ currentCommandDoc.name }}</strong>
+                        <code>{{ currentCommandDoc.syntax.replace(currentCommandDoc.name, '').trim() }}</code>
+                    </div>
+                    <div class="saved-command-doc-meta">
+                        <div v-if="currentCommandDoc.since">
+                            <strong>{{ $t('interface.command_doc_since') }}:</strong> {{ currentCommandDoc.since }}
+                        </div>
+                        <div v-if="currentCommandDoc.complexity">
+                            <strong>{{ $t('interface.command_doc_complexity') }}:</strong> {{ currentCommandDoc.complexity }}
+                        </div>
+                        <div v-if="currentCommandDoc.acl?.length">
+                            <strong>{{ $t('interface.command_doc_acl') }}:</strong>
+                            <code>{{ currentCommandDoc.acl.join(', ') }}</code>
+                        </div>
+                    </div>
+                    <p class="saved-command-doc-summary">{{ currentCommandDoc.summary }}</p>
+                    <div class="saved-command-doc-section">
+                        <strong>{{ $t('interface.command_doc_syntax') }}</strong>
+                        <pre>{{ currentCommandDoc.syntax }}</pre>
+                    </div>
+                    <div class="saved-command-doc-source">
+                        {{ $t('interface.command_doc_source') }}:
+                        <a href="#" @click.prevent="openCommandDoc">redis-doc</a>
+                    </div>
+                </template>
+                <div v-else class="saved-command-doc-empty">
+                    <template v-if="currentCommandName">
+                        {{ $t('interface.command_doc_not_found', { command: currentCommandName }) }}
+                    </template>
+                    <template v-else>
+                        {{ $t('interface.command_doc_empty') }}
+                    </template>
+                </div>
+            </aside>
         </div>
         <div class="saved-command-status flex-box-h">
             <span>{{ $t('interface.selected_command_count', { count: selectedCommandCount }) }}</span>
@@ -293,15 +370,95 @@ onUnmounted(destroyEditor)
     background-color: v-bind('themeVars.bodyColor');
 }
 
+.saved-command-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    flex: 1;
+    min-height: 0;
+}
+
 .saved-command-editor {
     position: relative;
-    flex: 1;
     min-height: 0;
 }
 
 .saved-command-editor-inst {
     position: absolute;
     inset: 0;
+}
+
+.saved-command-doc {
+    box-sizing: border-box;
+    min-width: 0;
+    overflow: auto;
+    padding: 16px 14px;
+    background-color: v-bind('themeVars.cardColor');
+    border-left: 1px solid v-bind('themeVars.dividerColor');
+}
+
+.saved-command-doc-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.saved-command-doc-title code,
+.saved-command-doc-meta code,
+.saved-command-doc-section pre {
+    font-family: 'Courier New', monospace;
+}
+
+.saved-command-doc-meta {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 12px;
+    color: v-bind('themeVars.textColor2');
+    background-color: v-bind('themeVars.actionColor');
+    border-radius: 4px;
+    line-height: 1.45;
+}
+
+.saved-command-doc-summary {
+    margin: 0 0 16px;
+    color: v-bind('themeVars.textColor1');
+    line-height: 1.45;
+}
+
+.saved-command-doc-section {
+    padding-top: 12px;
+    border-top: 1px solid v-bind('themeVars.dividerColor');
+}
+
+.saved-command-doc-section pre {
+    box-sizing: border-box;
+    margin: 8px 0 0;
+    padding: 10px;
+    overflow: auto;
+    background-color: v-bind('themeVars.codeColor');
+    border: 1px solid v-bind('themeVars.borderColor');
+    border-radius: 4px;
+    white-space: pre-wrap;
+}
+
+.saved-command-doc-source {
+    margin-top: 16px;
+    padding-top: 12px;
+    color: v-bind('themeVars.textColor3');
+    border-top: 1px solid v-bind('themeVars.dividerColor');
+}
+
+.saved-command-doc-source a {
+    color: v-bind('themeVars.primaryColor');
+    text-decoration: none;
+}
+
+.saved-command-doc-empty {
+    color: v-bind('themeVars.textColor3');
+    line-height: 1.5;
 }
 
 .saved-command-status {

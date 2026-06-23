@@ -156,6 +156,13 @@
     "empty_command_list": "No saved commands",
     "execute_selected": "Execute Selected",
     "selected_command_count": "{count} command selected",
+    "command_doc_acl": "ACL categories",
+    "command_doc_complexity": "Time complexity",
+    "command_doc_empty": "Move the cursor to a Redis command line to view its documentation.",
+    "command_doc_not_found": "No documentation found for {command}.",
+    "command_doc_since": "Available since",
+    "command_doc_source": "Data source",
+    "command_doc_syntax": "Syntax",
     "cli_welcome": "Welcome to Tiny RDM Redis Console",
     "retrieving_version": "Checking for updates",
     "sub_tab": {
