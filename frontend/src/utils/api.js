@@ -87,6 +87,10 @@ export function SaveRefreshInterval(name, interval) {
     return post('/connection/save-refresh-interval', { name, interval })
 }
 
+export function SaveCommands(name, commands) {
+    return post('/connection/save-commands', { name, commands })
+}
+
 export async function ExportConnections() {
     // Web mode: trigger browser download of connections zip
     try {
@@ -313,6 +317,10 @@ export function StartCli(server, db) {
 
 export function CloseCli(server) {
     return post('/cli/close', { server })
+}
+
+export function ExecCommand(server, command) {
+    return post('/cli/exec', { server, command })
 }
 
 // ==================== Monitor Service ====================

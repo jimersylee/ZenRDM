@@ -11,6 +11,7 @@ import {
     ParseConnectURL,
     RenameGroup,
     SaveConnection,
+    SaveCommands,
     SaveLastDB,
     SaveRefreshInterval,
     SaveSortedConnection
@@ -38,6 +39,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {string} keySeparator
      * @property {string} markColor
      * @property {number} refreshInterval
+     * @property {string[]} savedCommands
      */
 
     /**
@@ -87,6 +89,7 @@ const useConnectionStore = defineStore('connections', {
                         keySeparator: conn.keySeparator,
                         markColor: conn.markColor,
                         refreshInterval: conn.refreshInterval,
+                        savedCommands: conn.savedCommands || [],
                     }
                 } else {
                     // custom group
@@ -108,6 +111,7 @@ const useConnectionStore = defineStore('connections', {
                             keySeparator: item.keySeparator,
                             markColor: item.markColor,
                             refreshInterval: item.refreshInterval,
+                            savedCommands: item.savedCommands || [],
                         }
                     }
                     conns.push({
@@ -136,6 +140,8 @@ const useConnectionStore = defineStore('connections', {
                         defaultFilter: data.defaultFilter,
                         keySeparator: data.keySeparator,
                         markColor: data.markColor,
+                        refreshInterval: data.refreshInterval,
+                        savedCommands: data.savedCommands || [],
                     }
                     return data
                 }
@@ -168,6 +174,7 @@ const useConnectionStore = defineStore('connections', {
                 keyView: KeyViewType.Tree,
                 loadSize: 10000,
                 markColor: '',
+                savedCommands: [],
                 alias: {},
                 ssl: {
                     enable: false,
@@ -292,6 +299,24 @@ const useConnectionStore = defineStore('connections', {
             }
             const s = mapToList(this.connections)
             SaveSortedConnection(s)
+        },
+
+        /**
+         * save reusable commands for a connection
+         * @param {string} name
+         * @param {string[]} commands
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async saveCommands(name, commands) {
+            const { success, msg } = await SaveCommands(name, commands)
+            if (!success) {
+                return { success: false, msg }
+            }
+            this.serverProfile[name] = {
+                ...(this.serverProfile[name] || {}),
+                savedCommands: commands,
+            }
+            return { success: true }
         },
 
         /**

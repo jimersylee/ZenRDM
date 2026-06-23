@@ -42,29 +42,56 @@ func Cli() *cliService {
 	return cli
 }
 
-func (c *cliService) runCommand(server, data string) {
+func (c *cliService) execCommand(server, data string) (any, error) {
 	if cmds := strutil.SplitCmd(data); len(cmds) > 0 && len(cmds[0]) > 0 {
 		if client, err := c.getRedisClient(server); err == nil {
 			args := sliceutil.Map(cmds, func(i int) any {
 				return cmds[i]
 			})
 			if result, err := client.Do(c.ctx, args...).Result(); err == nil || errors.Is(err, redis.Nil) {
-				if strings.ToLower(cmds[0]) == "select" {
+				if strings.ToLower(cmds[0]) == "select" && len(cmds) > 1 {
 					// switch database
 					if db, ok := strutil.AnyToInt(cmds[1]); ok {
 						c.selectedDB[server] = db
 					}
 				}
 
-				c.echo(server, result, true)
-			} else {
-				c.echoError(server, err.Error())
+				return result, nil
 			}
-			return
+			return nil, err
+		} else {
+			return nil, err
 		}
 	}
+	return "", nil
+}
 
-	c.echoReady(server)
+func (c *cliService) runCommand(server, data string) {
+	result, err := c.execCommand(server, data)
+	if err != nil {
+		c.echoError(server, err.Error())
+		return
+	}
+	c.echo(server, result, true)
+}
+
+// ExecCommand executes one Redis command and returns formatted output.
+func (c *cliService) ExecCommand(server, data string) (resp types.JSResp) {
+	result, err := c.execCommand(server, data)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	var output cliOutput
+	if result != nil {
+		str := strutil.AnyToString(result, "", 0)
+		output.Content = strings.Split(str, "\n")
+	}
+	output.Prompt = fmt.Sprintf("%s:db%d> ", server, c.selectedDB[server])
+	resp.Data = output
+	resp.Success = true
+	return
 }
 
 func (c *cliService) echo(server string, data any, newLineReady bool) {
@@ -102,6 +129,7 @@ func (c *cliService) getRedisClient(server string) (redis.UniversalClient, error
 			return nil, err
 		}
 		c.clients[server] = client
+		c.selectedDB[server] = conf.LastDB
 	}
 	return client, nil
 }

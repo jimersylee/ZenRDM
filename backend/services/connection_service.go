@@ -507,6 +507,23 @@ func (c *connectionService) SaveRefreshInterval(name string, interval int) (resp
 	return
 }
 
+// SaveCommands saves reusable Redis commands for one connection.
+func (c *connectionService) SaveCommands(name string, commands []string) (resp types.JSResp) {
+	param := c.conns.GetConnection(name)
+	if param == nil {
+		resp.Msg = "no connection named \"" + name + "\""
+		return
+	}
+
+	param.SavedCommands = commands
+	if err := c.conns.UpdateConnection(name, param.ConnectionConfig); err != nil {
+		resp.Msg = "save connection fail:" + err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
 // ExportConnections export connections to zip file
 func (c *connectionService) ExportConnections() (resp types.JSResp) {
 	defaultFileName := "connections_" + time.Now().Format("20060102150405") + ".zip"

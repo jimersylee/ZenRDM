@@ -36,6 +36,18 @@ func registerCLIRoutes(rg *gin.RouterGroup) {
 		c.JSON(http.StatusOK, services.Cli().CloseCli(req.Server))
 	})
 
+	g.POST("/exec", func(c *gin.Context) {
+		var req struct {
+			Server  string `json:"server"`
+			Command string `json:"command"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, types.JSResp{Msg: "invalid request"})
+			return
+		}
+		c.JSON(http.StatusOK, services.Cli().ExecCommand(req.Server, req.Command))
+	})
+
 	// CLI input is handled via WebSocket - the frontend sends
 	// {"event": "cmd:input:<server>", "data": "<command>"} over WS
 }

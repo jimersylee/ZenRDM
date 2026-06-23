@@ -11,12 +11,14 @@ import Log from '@/components/icons/Log.vue'
 import Detail from '@/components/icons/Detail.vue'
 import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.vue'
 import ContentCli from '@/components/content_value/ContentCli.vue'
+import ContentSavedCommands from '@/components/content_value/ContentSavedCommands.vue'
 import Monitor from '@/components/icons/Monitor.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
 import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentPubsub from '@/components/content_value/ContentPubsub.vue'
 import Subscribe from '@/components/icons/Subscribe.vue'
+import CodeIcon from '@/components/icons/Code.vue'
 
 const themeVars = useThemeVars()
 
@@ -142,6 +144,22 @@ watch(
                     </n-space>
                 </template>
                 <content-value-wrapper :blank="isBlankValue" :content="tabContent" />
+            </n-tab-pane>
+
+            <!-- saved commands pane -->
+            <n-tab-pane :name="BrowserTabType.SavedCommands.toString()" display-directive="show:lazy">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <code-icon
+                                :inverse="selectedSubTab === BrowserTabType.SavedCommands.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.saved_commands') }}</span>
+                    </n-space>
+                </template>
+                <content-saved-commands :server="props.server" />
             </n-tab-pane>
 
             <!-- cli pane -->

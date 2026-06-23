@@ -57,7 +57,7 @@ const hasTooltip = computed(() => {
                 :tertiary="props.tertiary"
                 :text="!props.border"
                 :type="props.type"
-                @click.prevent="emit('click')">
+                @click.prevent="(event) => emit('click', event)">
                 <template #icon>
                     <slot>
                         <n-icon :color="props.color || 'currentColor'" :size="props.size">
@@ -84,7 +84,7 @@ const hasTooltip = computed(() => {
         :tertiary="props.tertiary"
         :text="!props.border"
         :type="props.type"
-        @click.prevent="emit('click')">
+        @click.prevent="(event) => emit('click', event)">
         <template #icon>
             <slot>
                 <n-icon :color="props.color || 'currentColor'" :size="props.size">

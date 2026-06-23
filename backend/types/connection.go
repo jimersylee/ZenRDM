@@ -23,6 +23,7 @@ type ConnectionConfig struct {
 	MarkColor       string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 	RefreshInterval int                `json:"refreshInterval,omitempty" yaml:"refresh_interval,omitempty"`
 	Alias           map[int]string     `json:"alias,omitempty" yaml:"alias,omitempty"`
+	SavedCommands   []string           `json:"savedCommands,omitempty" yaml:"saved_commands,omitempty"`
 	SSL             ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
 	SSH             ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 	Sentinel        ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
