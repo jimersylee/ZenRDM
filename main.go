@@ -111,7 +111,7 @@ func main() {
 			prefSvc,
 		},
 		Mac: &mac.Options{
-			TitleBar: mac.TitleBarHiddenInset(),
+			TitleBar: mac.TitleBarHidden(),
 			About: &mac.AboutInfo{
 				Title:   fmt.Sprintf("%s %s", appName, version),
 				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © " + time.Now().Format("2006"),
