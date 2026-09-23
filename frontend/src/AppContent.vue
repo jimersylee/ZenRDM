@@ -33,7 +33,7 @@ const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
 const logPaneRef = ref(null)
 const exThemeVars = computed(() => {
-    return extraTheme(prefStore.isDark)
+    return extraTheme(prefStore.general.theme, prefStore.isDark)
 })
 const macTitleInsetLeft = 88
 // const preferences = ref({})

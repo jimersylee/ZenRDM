@@ -5,10 +5,8 @@
  * @property {string} splitColor
  */
 
-/**
- *
- * @type ExtraTheme
- */
+import { getThemePalette } from './theme.js'
+
 export const extraLightTheme = {
     titleColor: '#F2F2F2',
     ribbonColor: '#F9F9F9',
@@ -17,10 +15,6 @@ export const extraLightTheme = {
     splitColor: '#DADADA',
 }
 
-/**
- *
- * @type ExtraTheme
- */
 export const extraDarkTheme = {
     titleColor: '#262626',
     ribbonColor: '#2C2C2C',
@@ -31,9 +25,23 @@ export const extraDarkTheme = {
 
 /**
  *
- * @param {boolean} dark
+ * @param {string|boolean} theme
+ * @param {boolean} isDark
  * @return ExtraTheme
  */
-export const extraTheme = (dark) => {
-    return dark ? extraDarkTheme : extraLightTheme
+export const extraTheme = (theme, isDark = false) => {
+    if (typeof theme === 'boolean') {
+        return theme ? extraDarkTheme : extraLightTheme
+    }
+    if (typeof theme !== 'string' || !theme.startsWith('catppuccin-')) {
+        return theme === 'dark' || (theme === 'auto' && isDark) ? extraDarkTheme : extraLightTheme
+    }
+    const palette = getThemePalette(theme, isDark)
+    return {
+        titleColor: palette.mantle,
+        ribbonColor: palette.crust,
+        ribbonActiveColor: palette.surface1,
+        sidebarColor: palette.mantle,
+        splitColor: palette.surface1,
+    }
 }

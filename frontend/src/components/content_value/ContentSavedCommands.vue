@@ -217,7 +217,7 @@ onMounted(() => {
     commandText.value = commandsToText(storedCommands.value)
     editorNode = monaco.editor.create(editorRef.value, {
         value: commandText.value,
-        theme: prefStore.isDark ? 'rdm-dark' : 'rdm-light',
+        theme: prefStore.monacoTheme,
         language: 'redis',
         lineNumbers: 'on',
         readOnly: false,
@@ -270,10 +270,10 @@ watch(
 )
 
 watch(
-    () => prefStore.isDark,
-    (dark) => {
+    () => prefStore.monacoTheme,
+    (theme) => {
         editorNode?.updateOptions({
-            theme: dark ? 'rdm-dark' : 'rdm-light',
+            theme,
         })
     },
 )
