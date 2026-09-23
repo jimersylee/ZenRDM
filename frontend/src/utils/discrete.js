@@ -1,6 +1,5 @@
 import usePreferencesStore from 'stores/preferences.js'
 import { createDiscreteApi, darkTheme } from 'naive-ui'
-import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { computed } from 'vue'
 
@@ -99,7 +98,7 @@ export async function setupDiscreteApi() {
     const prefStore = usePreferencesStore()
     const configProviderProps = computed(() => ({
         theme: prefStore.isDark ? darkTheme : undefined,
-        themeOverrides,
+        themeOverrides: prefStore.currentThemeOverrides,
     }))
     const { message, dialog, notification } = createDiscreteApi(['message', 'notification', 'dialog'], {
         configProviderProps,
@@ -109,7 +108,7 @@ export async function setupDiscreteApi() {
             containerStyle: {
                 marginBottom: '38px',
             },
-            themeOverrides: prefStore.isDark ? darkThemeOverrides.Message : themeOverrides.Message,
+            themeOverrides: prefStore.currentThemeOverrides.Message,
         },
         notificationProviderProps: {
             max: 5,

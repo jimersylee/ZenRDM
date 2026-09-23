@@ -52,9 +52,12 @@ export default defineConfig({
             },
         },
     },
-    ...(isWeb
-        ? {
-              server: {
+    server: {
+        host: 'localhost',
+        port: 5173,
+        strictPort: true,
+        ...(isWeb
+            ? {
                   proxy: {
                       '/api': {
                           target: 'http://localhost:8088',
@@ -65,7 +68,7 @@ export default defineConfig({
                           ws: true,
                       },
                   },
-              },
-          }
-        : {}),
+              }
+            : {}),
+    },
 })

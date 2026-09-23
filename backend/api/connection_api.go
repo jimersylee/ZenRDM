@@ -26,8 +26,8 @@ func registerConnectionRoutes(rg *gin.RouterGroup) {
 
 	g.POST("/save", func(c *gin.Context) {
 		var req struct {
-			Name   string                 `json:"name"`
-			Param  types.ConnectionConfig `json:"param"`
+			Name  string                 `json:"name"`
+			Param types.ConnectionConfig `json:"param"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, types.JSResp{Msg: "invalid request"})
@@ -112,6 +112,18 @@ func registerConnectionRoutes(rg *gin.RouterGroup) {
 			return
 		}
 		c.JSON(http.StatusOK, services.Connection().SaveRefreshInterval(req.Name, req.Interval))
+	})
+
+	g.POST("/save-commands", func(c *gin.Context) {
+		var req struct {
+			Name     string   `json:"name"`
+			Commands []string `json:"commands"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, types.JSResp{Msg: "invalid request"})
+			return
+		}
+		c.JSON(http.StatusOK, services.Connection().SaveCommands(req.Name, req.Commands))
 	})
 
 	g.POST("/export", func(c *gin.Context) {

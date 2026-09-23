@@ -15,7 +15,6 @@ import { useI18n } from 'vue-i18n'
 import { darkTheme, NButton, NSpace } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { Environment, WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
-import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
 import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
@@ -227,7 +226,7 @@ watch(
         :inline-theme-disabled="true"
         :locale="prefStore.themeLocale"
         :theme="prefStore.isDark ? darkTheme : undefined"
-        :theme-overrides="prefStore.isDark ? darkThemeOverrides : themeOverrides"
+        :theme-overrides="prefStore.currentThemeOverrides"
         class="fill-height">
         <!-- Web mode: auth gate -->
         <template v-if="isWeb() && authChecking">

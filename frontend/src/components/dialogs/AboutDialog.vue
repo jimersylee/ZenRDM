@@ -22,7 +22,7 @@ const onOpenWebsite = () => {
     <n-modal v-model:show="dialogStore.aboutDialogVisible" :show-icon="false" preset="dialog" transform-origin="center">
         <n-space :size="10" :wrap="false" :wrap-item="false" align="center" vertical>
             <n-avatar :size="120" :src="iconUrl" color="#0000"></n-avatar>
-            <div class="about-app-title">Tiny RDM</div>
+            <div class="about-app-title">ZenRDM</div>
             <n-text>{{ prefStore.appVersion }}</n-text>
             <n-space :size="5" :wrap="false" :wrap-item="false" align="center">
                 <n-text class="about-link" @click="onOpenSource">{{ $t('dialogue.about.source') }}</n-text>

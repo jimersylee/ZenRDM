@@ -23,6 +23,13 @@ const dialogStore = useDialog()
 const i18n = useI18n()
 const loading = ref(false)
 
+const themeOptions = computed(() =>
+    prefStore.themeOption.map((option) => ({
+        ...option,
+        label: option.labelKey ? i18n.t(option.labelKey) : option.label,
+    })),
+)
+
 const initPreferences = async () => {
     try {
         loading.value = true
@@ -214,14 +221,10 @@ const onClose = () => {
                 <n-form :disabled="loading" :model="prefStore.general" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
                         <n-form-item-gi :label="$t('preferences.general.theme')" :span="24" required>
-                            <n-radio-group v-model:value="prefStore.general.theme" name="theme" size="medium">
-                                <n-radio-button
-                                    v-for="opt in prefStore.themeOption"
-                                    :key="opt.value"
-                                    :value="opt.value">
-                                    {{ $t(opt.label) }}
-                                </n-radio-button>
-                            </n-radio-group>
+                            <n-select
+                                v-model:value="prefStore.general.theme"
+                                :options="themeOptions"
+                                style="width: 260px" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.language')" :span="24" required>
                             <n-select

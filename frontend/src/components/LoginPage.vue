@@ -14,17 +14,23 @@ import { useI18n } from 'vue-i18n'
 import { useRender } from '@/utils/render.js'
 import { STORAGE_LANG_KEY, STORAGE_THEME_KEY } from '@/consts/localstorage_key.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { getThemePalette } from '@/utils/theme.js'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
 const i18n = useI18n()
 const emit = defineEmits(['login'])
 
-const bgGradient = computed(() =>
-    prefStore.isDark
+const bgGradient = computed(() => {
+    const theme = prefStore.general.theme
+    if (typeof theme === 'string' && theme.startsWith('catppuccin-')) {
+        const palette = getThemePalette(theme, prefStore.isDark)
+        return `linear-gradient(135deg, ${palette.crust} 0%, ${palette.mantle} 50%, ${palette.base} 100%)`
+    }
+    return prefStore.isDark
         ? 'linear-gradient(135deg, #2c1c1a 0%, #2a2219 20%, #1c2030 45%, #1a2535 65%, #251c28 85%, #2a1e1e 100%)'
-        : 'linear-gradient(135deg, #fce4e3 0%, #f5e6d8 20%, #e8eef8 45%, #dce8f8 65%, #f2e8f0 85%, #f8f0f0 100%)',
-)
+        : 'linear-gradient(135deg, #fce4e3 0%, #f5e6d8 20%, #e8eef8 45%, #dce8f8 65%, #f2e8f0 85%, #f8f0f0 100%)'
+})
 
 // --- Theme ---
 const themeMode = ref(localStorage.getItem(STORAGE_THEME_KEY) || 'auto')
@@ -45,17 +51,16 @@ const getThemeLabels = (langKey) => {
 
 const themeOptions = computed(() => {
     const labels = getThemeLabels(currentLang.value)
-    return [
-        { label: labels.light, key: 'light', icon: Sun },
-        { label: labels.dark, key: 'dark', icon: Moon },
-        { label: labels.auto, key: 'auto', icon: ThemeAuto },
-    ]
+    return prefStore.themeOption.map((option) => ({
+        label: labels[option.value] || option.label,
+        key: option.value,
+        icon: option.mode === 'auto' ? ThemeAuto : option.mode === 'dark' ? Moon : Sun,
+    }))
 })
 
-const currentThemeLabel = computed(() => {
-    const labels = getThemeLabels(currentLang.value)
-    return labels[themeMode.value]
-})
+const currentThemeOption = computed(() => themeOptions.value.find((option) => option.key === themeMode.value))
+const currentThemeLabel = computed(() => currentThemeOption.value?.label || themeMode.value)
+const currentThemeIcon = computed(() => currentThemeOption.value?.icon || ThemeAuto)
 
 const onThemeSelect = (key) => {
     if (!prefStore.allThemes.includes(key)) {
@@ -151,7 +156,7 @@ const handleLogin = async () => {
         <div class="login-card">
             <div class="login-header">
                 <n-avatar :size="64" :src="iconUrl" color="#0000" />
-                <div class="login-title">Tiny RDM</div>
+                <div class="login-title">ZenRDM</div>
                 <!--                <n-text depth="3" style="font-size: 13px">Redis Web Manager</n-text>-->
             </div>
 
@@ -205,9 +210,7 @@ const handleLogin = async () => {
                     trigger="hover"
                     @select="onThemeSelect">
                     <span class="toolbar-btn">
-                        <n-icon
-                            :component="themeMode === 'dark' ? Moon : themeMode === 'light' ? Sun : ThemeAuto"
-                            :size="14" />
+                        <n-icon :component="currentThemeIcon" :size="14" />
                         <span>{{ currentThemeLabel }}</span>
                     </span>
                 </n-dropdown>

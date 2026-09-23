@@ -17,6 +17,7 @@ import { h, nextTick } from 'vue'
 import { compareVersion } from '@/utils/version.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
 import { TextAlignType } from '@/consts/text_align_type.js'
+import { getMonacoThemeName, getThemeOverrides, isDarkTheme, THEME_OPTIONS } from '@/utils/theme.js'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -84,20 +85,12 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         themeOption() {
-            return [
-                {
-                    value: 'light',
-                    label: 'preferences.general.theme_light',
-                },
-                {
-                    value: 'dark',
-                    label: 'preferences.general.theme_dark',
-                },
-                {
-                    value: 'auto',
-                    label: 'preferences.general.theme_auto',
-                },
-            ]
+            return THEME_OPTIONS.map((option) => ({
+                ...option,
+                labelKey: ['light', 'dark', 'auto'].includes(option.value)
+                    ? `preferences.general.theme_${option.value}`
+                    : undefined,
+            }))
         },
 
         /**
@@ -251,11 +244,15 @@ const usePreferencesStore = defineStore('preferences', {
 
         isDark() {
             const th = get(this.general, 'theme', 'auto')
-            if (th !== 'auto') {
-                return th === 'dark'
-            } else {
-                return osTheme.value === 'dark'
-            }
+            return isDarkTheme(th, osTheme.value === 'dark')
+        },
+
+        currentThemeOverrides() {
+            return getThemeOverrides(get(this.general, 'theme', 'auto'), this.isDark)
+        },
+
+        monacoTheme() {
+            return getMonacoThemeName(get(this.general, 'theme', 'auto'), this.isDark)
         },
 
         themeLocale() {

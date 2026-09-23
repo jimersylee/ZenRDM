@@ -147,7 +147,7 @@ const handleLogout = async () => {
 }
 
 const exThemeVars = computed(() => {
-    return extraTheme(prefStore.isDark)
+    return extraTheme(prefStore.general.theme, prefStore.isDark)
 })
 </script>
 
